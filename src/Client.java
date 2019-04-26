@@ -2,12 +2,12 @@ import mpi.*;
 
 public class Client implements CallBack{
 	
-	boolean found ;
-	int currentLength;
+	boolean[] found ;
+	int[] currentLength;
 	String[] args;
 	int myRank;
 	
-	public Client(String[] args,boolean found,int currentLength)
+	public Client(String[] args,boolean[] found,int[] currentLength)
 	{
 		/* Get Main arguments */
 		this.args = args;
@@ -16,7 +16,14 @@ public class Client implements CallBack{
 		/* Boolean which will determine when to stop */
 		this.found = found;
 		/* Initialize MPI */
-		MPI.Init(args);	
+		if (false == MPI.Initialized())
+		{
+			MPI.Init(args);	
+		}
+		else
+		{
+			//nothing
+		}
 		/* Get my Process Rank */
 		myRank = MPI.COMM_WORLD.Rank();
 	}
@@ -30,10 +37,10 @@ public class Client implements CallBack{
 		 *  ---------- HERE -----------
 		 */
 		
-		if (true == found)
+		if (true == found[0])
 		{
 			/* Broadcast to all that the password found */
-			MPI.COMM_WORLD.Bcast(Boolean.valueOf(found), 0,1, MPI.BOOLEAN, myRank);
+			MPI.COMM_WORLD.Bcast(found, 0,found.length, MPI.BOOLEAN, myRank);
 			returnValue = true;
 		}
 		else
@@ -51,11 +58,11 @@ public class Client implements CallBack{
 		BruteForceGenerator myGenerator = new BruteForceGenerator();
 		/* Set "Client" as call back */
 		myGenerator.setCallBack(this);
-		/* Generate Password at current length */
-		myGenerator.crackPassword(currentLength);
 		/* Increment the length */
-		currentLength++;
+		currentLength[0]++;
 		/* Broadcast the new length */
-		MPI.COMM_WORLD.Bcast(Integer.valueOf(currentLength), 0, currentLength*Integer.SIZE, MPI.INT, myRank);
+		MPI.COMM_WORLD.Bcast(currentLength, 0, currentLength.length, MPI.INT, myRank);
+		/* Generate Password at current length */
+		myGenerator.crackPassword(currentLength[0]);
 	}
 }

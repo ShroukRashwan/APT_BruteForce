@@ -2,8 +2,8 @@
 public class Main {
 	
 	/* Fields need to be public for MPI */
-	static boolean found = false;
-	static int currentLength = 0;
+	static boolean found[] = {false};
+	static int[] currentLength = {0};
 
 	public static void main(String[] args) 
 	{
@@ -22,9 +22,11 @@ public class Main {
 		//myGenerator.crackPassword(3);
 		
 		/* Create new Client Object */
-		Client client = new Client(args,found,currentLength);
-		client.start();
 		
+		while ( false == found[0])
+		{
+			Client client = new Client(args,found,currentLength);
+			client.start();
+		}	
 	}
-
 }
