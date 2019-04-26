@@ -22,10 +22,9 @@ public class Main {
 		//myGenerator.crackPassword(3);
 		
 		/* Create new Client Object */
-		
+		Client client = new Client(args,found,currentLength);
 		while ( false == found[0])
 		{
-			Client client = new Client(args,found,currentLength);
 			client.start();
 		}	
 	}
