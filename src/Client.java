@@ -56,22 +56,59 @@ public class Client implements CallBack{
 	{
 		if ( 0 == myRank)
 		{
-			Request R1 = MPI.COMM_WORLD.Irecv(currentLength, 0, currentLength.length, MPI.INT, 1, 66);
-			Request R2 = MPI.COMM_WORLD.Irecv(currentLength, 0, currentLength.length, MPI.INT, 2, 66);
-			Request R3 = MPI.COMM_WORLD.Irecv(currentLength, 0, currentLength.length, MPI.INT, 3, 66);
-			Request R4 = MPI.COMM_WORLD.Irecv(currentLength, 0, currentLength.length, MPI.INT, 4, 66);
+			Request[] Requests = new Request[4];
+			Requests[0] = MPI.COMM_WORLD.Irecv(currentLength, 0, currentLength.length, MPI.INT, 1, 66);
+			Requests[1] = MPI.COMM_WORLD.Irecv(currentLength, 0, currentLength.length, MPI.INT, 2, 66);
+			Requests[2] = MPI.COMM_WORLD.Irecv(currentLength, 0, currentLength.length, MPI.INT, 3, 66);
+			Requests[3] = MPI.COMM_WORLD.Irecv(currentLength, 0, currentLength.length, MPI.INT, 4, 66);
+			
+			Status process = null;
+			while( null == process)
+			{
+				process = Request.Testany(Requests);
+			}
+			
+			System.out.println("the finished process: " + process.index);
+			switch (process.index)
+			{
+				case 0:
+					/* Send new length to process 1 */
+					MPI.COMM_WORLD.Isend(currentLength, 0, currentLength.length, MPI.INT, 1, 22);
+					/* Increment the length */
+					currentLength[0]++;
+					break;
+				case 1:
+					/* Send new length to process 2 */
+					MPI.COMM_WORLD.Isend(currentLength, 0, currentLength.length, MPI.INT, 2, 22);
+					/* Increment the length */
+					currentLength[0]++;
+					break;
+				case 2:
+					/* Send new length to process 3 */
+					MPI.COMM_WORLD.Isend(currentLength, 0, currentLength.length, MPI.INT, 3, 22);
+					/* Increment the length */
+					currentLength[0]++;
+					break;
+				case 3:
+					/* Send new length to process 3 */
+					MPI.COMM_WORLD.Isend(currentLength, 0, currentLength.length, MPI.INT, 4, 22);
+					/* Increment the length */
+					currentLength[0]++;
+					break;
+				default:
+					// Nothing
+					break;
+			}
 						
-			/* Broadcast the new length */
-			MPI.COMM_WORLD.Bcast(currentLength, 0, currentLength.length, MPI.INT, 0);
-			/* Increment the length */
-			currentLength[0]++;
 		}
 		else
 		{
 			/* Get the new length */
-			MPI.COMM_WORLD.Bcast(currentLength, 0, currentLength.length, MPI.INT, 0);
+			MPI.COMM_WORLD.Send(currentLength, 0, currentLength.length, MPI.INT, 0, 66);
+			MPI.COMM_WORLD.Recv(currentLength, 0, currentLength.length, MPI.INT, 0, 22);
+			/* For debugging only */
+			System.out.println("current length: " + currentLength[0] + " My Rank: " + myRank);			
 			/* Create Generator Object */
-			System.out.println("current length" + currentLength[0]);
 			BruteForceGenerator myGenerator = new BruteForceGenerator();
 			/* Set "Client" as call back */
 			myGenerator.setCallBack(this);
