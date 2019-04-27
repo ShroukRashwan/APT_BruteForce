@@ -23,11 +23,6 @@ public class Main {
 		
 		/* Create new Client Object */
 		Client client = new Client(args,found,currentLength);
-		int x =3;
-		while ( x>=0)
-		{
-			client.start();
-			x--;
-		}	
+	    client.start();
 	}
 }
