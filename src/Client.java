@@ -1,97 +1,60 @@
-import mpi.*;
 
-public class Client implements CallBack{
+public class Client implements CallBack, Runnable{
+
+	int myID;
+	boolean run = true;
 	
-	boolean[] found ;
-	int[] currentLength;
-	String[] args;
-	int myRank;
-	
-	public Client(String[] args,boolean[] found,int[] currentLength)
+	public Client(int id)
 	{
-		/* Get Main arguments */
-		this.args = args;
-		/* Get Length to start generate at */
-		this.currentLength = currentLength;
-		/* Boolean which will determine when to stop */
-		this.found = found;
-		/* Initialize MPI */
-		if (false == MPI.Initialized())
-		{
-			MPI.Init(args);	
-		}
-		else
-		{
-			//nothing
-		}
-		/* Get my Process Rank */
-		myRank = MPI.COMM_WORLD.Rank();
-		/* For debugging only */
-		System.out.println("Client number " + myRank + " Started");
+		myID = id;
 	}
 	
 	public boolean CallBackFunction(StringBuilder input)
-	{
-		boolean returnValue = false;
-		
+	{		
 		/* 
 		 * Client Server Code which change Value of Found 
 		 *  ---------- HERE -----------
 		 */
-		
-		if (true == found[0])
+		if (input.toString().equals("11"))
 		{
-			/* Broadcast to all that the password found */
-			//MPI.COMM_WORLD.Bcast(found, 0,found.length, MPI.BOOLEAN, 0);
-			returnValue = true;
+			/* For Debugging: Print found Password */
+			System.out.println("Password found: " + input.toString());
+			/* Get Password to be send to server */
+			Main.password = input.toString();
+			Main.found[myID] = true;
 		}
 		else
 		{
-			// Nothing
+			Main.found[myID] = false;
 		}
-		return returnValue;
+		 return Main.found[myID];
 	}
 	
-	public void start()
-	{
-		while (false == found[0])
+	public void run() {
+		
+		while (true == run || Main.currentLength < Main.maxLength)
 		{
-			if ( 0 == myRank)
+			/* Search if any thread found the password */ 
+			for(int i=0; i< Main.found.length; i++ )
 			{
-				
-				/* Send new length to process 1 */
-				MPI.COMM_WORLD.Isend(currentLength, 0, currentLength.length, MPI.INT, 1, 22);
-				/* Increment the length */
-				currentLength[0]++;
-	
-				/* Send new length to process 2 */
-				MPI.COMM_WORLD.Isend(currentLength, 0, currentLength.length, MPI.INT, 2, 22);
-				/* Increment the length */
-				currentLength[0]++;
-	
-				/* Send new length to process 3 */
-				MPI.COMM_WORLD.Isend(currentLength, 0, currentLength.length, MPI.INT, 3, 22);
-				/* Increment the length */
-				currentLength[0]++;
-	
-				/* Send new length to process 3 */
-				MPI.COMM_WORLD.Isend(currentLength, 0, currentLength.length, MPI.INT, 4, 22);
-				/* Increment the length */
-				currentLength[0]++;	
+				if( true == Main.found[i])
+				{
+					/* if yes stop running  and break from for loop*/
+					run = false;
+					break; 
+				}
+			}	
+			/* then break from while loop */
+			if ( false == run)
+			{
+				break;
 			}
-			else
-			{	
-	            /* Get the new length */
-				MPI.COMM_WORLD.Recv(currentLength, 0, currentLength.length, MPI.INT, 0, 22);
-				/* For debugging only */
-				//System.out.println("current length: " + currentLength[0] + " My Rank: " + myRank);			
-				/* Create Generator Object */
-				BruteForceGenerator myGenerator = new BruteForceGenerator();
-				/* Set "Client" as call back */
-				myGenerator.setCallBack(this);
-				/* Generate Password at current length */
-				myGenerator.crackPassword(currentLength[0]);
-			}
+			/* Create Generator Object */
+			BruteForceGenerator myGenerator = new BruteForceGenerator();
+			/* Set "Client" as call back */
+			myGenerator.setCallBack(this);
+			/* Generate Password at current length */
+			myGenerator.crackPassword(Main.currentLength++);
 		}
 	}
 }
