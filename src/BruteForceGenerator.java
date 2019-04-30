@@ -6,7 +6,7 @@ public class BruteForceGenerator
 	/* Variable of type CallBackInterface to store user's custom callback    */
 	private CallBack callBack;
 	/* Variable to store generated password in it at each step               */
-	private StringBuilder string = new StringBuilder("   ");
+	private StringBuilder string = new StringBuilder("");
 	/* Variable to store the Stack Depth of recursive calling to know the end*/
 	private long stackDepthCounter = 0;
 	/* Stores the CallBack Function result to stop generating if it's true   */
