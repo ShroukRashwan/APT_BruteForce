@@ -1,28 +1,35 @@
 /* Main Class */
 public class Main {
 	
-	/* Fields need to be public for MPI */
-	static boolean found[] = {false};
-	static int[] currentLength = {0};
+	/* Fields need to be public for Threading */
+	static public boolean[] found ;
+	static public String password = "";
+	/*********** Inputs From user ******************/
+	/* Current Length starting from minimum length */
+	static public int currentLength = 0;
+	/* Max length of passwords to stop at*/
+	static public int maxLength = 0;
+	/* Number of threads to search */
+	static int numberOfClients = 1;
 
-	public static void main(String[] args) 
+	public static void main(String[] args) throws InterruptedException 
 	{
-		/* an Object of the TestClass */
-		//TestClass myTest = new TestClass();
-		/* An Object of the Generator Class */
-		//BruteForceGenerator myGenerator = new BruteForceGenerator();
+		/* Initialize  the found Array */
+		found = new boolean[numberOfClients];
 		
-		/* Setting the CallBackFunction with your TestClass Object */
-		//myGenerator.setCallBack(myTest);
-		/* Calling the Generator to Generate Passwords with Length = 3,
-		 * and it will implicitly call your "CallBackFunction" in your "TestClass"
-		 * and if you return true, it will end the function and if not, it will continue
-		 * recursing until your CallBackFunction returns true
-		 */
-		//myGenerator.crackPassword(3);
+		for (int i=0 ; i< numberOfClients; i ++)
+		{
+			/* initialize it's found boolean by false */
+			found[i] = false;
+			/* Create new Client Object */
+			Client client = new Client(i);
+			/* Create thread with client object */
+			Thread T = new Thread(client);
+			/* Set Thread Name */
+			T.setName(String.valueOf(i));
+			/* Start the Thread */
+			T.start();
+		}
 		
-		/* Create new Client Object */
-		Client client = new Client(args,found,currentLength);
-	    client.start();
 	}
 }
